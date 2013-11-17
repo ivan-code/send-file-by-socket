@@ -1,0 +1,53 @@
+import java.net.*;
+import java.io.*;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Scanner;
+
+public class Server2 {
+  public static void main(String[] args) {
+     
+     try{
+        ServerSocket serverSocket = new ServerSocket(52345);
+        Socket socket = serverSocket.accept();
+		System.out.println("socket connecting !");
+		while(true){
+			DataInputStream inputFromClient = new DataInputStream(socket.getInputStream());
+			DataOutputStream outputToClient = new DataOutputStream(socket.getOutputStream());
+			String s1 = inputFromClient.readUTF();
+			String srcFile = "";
+			if (s1.equals("y") || s1.equals("Y") || s1.equals("yes") || s1.equals("YES"))
+			{
+				Scanner scanner = new Scanner(System.in);
+				System.out.print("Enter the address of the file: ");				
+				//String string = scanner.nextLine();
+				srcFile = scanner.nextLine();//"C:\\Users\\ivan\\Desktop\\makun.jpg";				
+				if (!srcFile.equals(""))	outputToClient.writeUTF(srcFile);
+				
+				String flag = inputFromClient.readUTF();
+				if (flag.equals("y")) {
+					InputStream in = new FileInputStream(srcFile); 
+					byte[] tempbytes = new byte[100]; int byteread = 0;
+					// in.read()返回实际读入的字节数
+					while ((byteread = in.read(tempbytes)) != -1) {
+						outputToClient.writeInt(byteread);
+						outputToClient.write(tempbytes, 0, byteread); //
+					}
+					in.close(); 
+				}
+				System.out.print("FINISH !");				
+			}				
+			//FROM OF OUT:
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//set the from of date
+			//System.out.println(df.format(new Date()));
+			String s2 = df.format(new Date()) +"\nEcho:"+s1+ "\n"; // new Date() get the date of right now
+			String s3 = s2 + "New connection accepted " + socket.getInetAddress() + " : " +socket.getPort() + "\n";
+			outputToClient.writeUTF(s3);   
+		}                 
+     }
+     catch(IOException ex){
+	System.err.println(ex);
+     }
+   
+  }
+}
